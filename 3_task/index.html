@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Проверки :D</title>
+        <style>
+            body {
+                font-family: Arial;
+                margin: 40px;
+                background: #380000;
+            }
+            .container {
+                max-width: 500px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            input {
+                width: 100%;
+                padding: 8px;
+                font-size: 16px;
+                margin: 10px 0;
+                box-sizing: border-box;
+            }
+            button {
+                background: #520000;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+            button:hover {
+                background: #7c1818;
+            }
+            .end {
+                margin-top: 20px;
+                font-size: 18px;
+                font-weight: bold;
+            }
+            .examples {
+                margin-top: 20px;
+                background: #eee;
+                padding: 10px;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Проверка скобок</h2>
+            <p>Введите строку из символов: <code>( ) [ ] { }</code></p>
+            <input type="text" id="bracketInput" placeholder="Например: {[]}" autocomplete="off">
+            <button id="checkBtn">Проверить</button>
+            <div class="end" id="end"></div>
+            <div class="examples">
+                <strong>Примеры :</strong><br>
+                <code>()</code> true<br> <code>{[]}</code> true<br>
+                <code>()[]{}</code> true<br> <code>(пусто)</code> true <br>
+                <code>(]</code> false<br> <code>([)]</code> false<br>
+                <code>(</code> false<br> <code>]</code> false<br>
+            </div>
+        </div>
+
+        <script>
+            function isValid(s) {
+                const stack = [];
+                const pairs = {
+                    ')': '(',
+                    ']': '[',
+                    '}': '{'
+                };
+
+                for (let i = 0; i < s.length; i++) {
+                    const ch = s[i];
+                    if (pairs[ch]) {
+                        if (stack.length === 0 || stack.pop() !== pairs[ch]) {
+                            return false;
+                        }
+                    } 
+                    else if (ch === '(' || ch === '[' || ch === '{') {
+                        stack.push(ch);
+                    }
+                }
+                return stack.length === 0;
+            }
+
+            document.getElementById('checkBtn').addEventListener('click', function() {
+                const in_str = document.getElementById('bracketInput').value;
+                const end = isValid(in_str);
+                const endDiv = document.getElementById('end');
+                endDiv.textContent = `Результат: ${end}`;
+            });
+
+        </script>
+    </body>
+</html>
