@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Глубокое копирование</title>
+        <style>
+            body { font-family: monospace; margin: 20px; }
+            .output { background: #f0f0f0; padding: 10px; border-left: 3px solid green; }
+        </style>
+    </head>
+    <body>
+        <h1>Глубокое копирование пример:</h1>
+        <div id="output" class="output"></div>
+
+        <script>
+            function deepCopy(obj, cache = new WeakMap()) {
+                if (obj === null || typeof obj !== 'object') return obj;
+                if (cache.has(obj)) return cache.get(obj);
+
+                if (obj instanceof Date) return new Date(obj);
+                if (obj instanceof RegExp) return new RegExp(obj.source, obj.flags);
+                if (obj instanceof Map) {
+                    const copy = new Map();
+                    cache.set(obj, copy);
+                    for (const [k, v] of obj) copy.set(deepCopy(k, cache), deepCopy(v, cache));
+                    return copy;
+                }
+                if (obj instanceof Set) {
+                    const copy = new Set();
+                    cache.set(obj, copy);
+                    for (const v of obj) copy.add(deepCopy(v, cache));
+                    return copy;
+                }
+
+                const proto = Object.getPrototypeOf(obj);
+                const copy = Array.isArray(obj) ? [] : Object.create(proto);
+                cache.set(obj, copy);
+
+                const keys = [...Object.getOwnPropertyNames(obj), ...Object.getOwnPropertySymbols(obj)];
+                for (const key of keys) {
+                    const desc = Object.getOwnPropertyDescriptor(obj, key);
+                    if (desc) {
+                        if (desc.value && typeof desc.value === 'object') desc.value = deepCopy(desc.value, cache);
+                        Object.defineProperty(copy, key, desc);
+                    }
+                }
+                return copy;
+            }
+
+            const original = {
+                a: 1,
+                b: { c: 2 },
+                d: [3, 4],
+                e: new Date(),
+                f: new Set([5, 6]),
+                g: new Map([['x', 7]]),
+                [Symbol('s')]: 8
+            };
+            original.cycle = original; // циклическая ссылка
+
+            const copy = deepCopy(original);
+            copy.b.c = 99; // изменение копии не влияет на оригинал
+
+            const output = `
+                original.b.c = ${original.b.c}<br>
+                copy.b.c = ${copy.b.c}<br>
+                copy.cycle === copy: ${copy.cycle === copy}<br>
+                copy.e instanceof Date: ${copy.e instanceof Date}<br>
+                copy.f.size: ${copy.f.size}<br>
+                copy.g.get('x'): ${copy.g.get('x')}<br>
+                Символ скопирован: ${Object.getOwnPropertySymbols(copy).length > 0}`;
+            document.getElementById('output').innerHTML = output;
+        </script>
+    </body>
+</html>
